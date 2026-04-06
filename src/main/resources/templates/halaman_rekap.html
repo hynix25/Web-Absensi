@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Rekapitulasi | AttendancePro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #4361ee; --bg: #f8f9fc; --text: #2d3436; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; color: var(--text); }
+
+        /* Header */
+        .header { background: white; padding: 25px 5%; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .container { width: 90%; max-width: 1200px; margin: 30px auto; }
+
+        /* Filter Card */
+        .filter-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 25px; border: 1px solid #edf2f7; }
+
+        /* Buttons */
+        .btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; text-decoration: none; cursor: pointer; border: none; font-size: 14px; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-reset { background: #f1f5f9; color: #64748b; }
+        .btn-print { background: #2d3436; color: white; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        /* Table */
+        .table-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); border: 1px solid #edf2f7; }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 15px; text-align: left; font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #f1f5f9; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+
+        /* Status Badge */
+        .badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .bg-hadir { background: #d1e7dd; color: #0f5132; }
+        .bg-izin { background: #f3effb; color: #6f42c1; }
+        .bg-sakit { background: #fff0f0; color: #e71d36; }
+
+        @media print { .no-print { display: none !important; } body { background: white; } .container { width: 100%; margin: 0; } }
+    </style>
+</head>
+<body>
+
+<div class="header no-print">
+    <div>
+        <h2 style="margin:0; color: var(--primary); font-size: 24px;">Laporan Rekapitulasi</h2>
+        <p style="margin:5px 0 0 0; color: #94a3b8; font-size: 13px;">Kelola riwayat absensi karyawan Anda</p>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <a href="/karyawan" class="btn btn-reset">← Kembali</a>
+        <button onclick="window.print()" class="btn btn-print">🖨️ Cetak PDF</button>
+    </div>
+</div>
+
+<div class="container">
+    <div class="filter-card no-print">
+        <form th:action="@{/rekap}" method="get" style="display: flex; align-items: flex-end; gap: 15px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label style="font-size: 11px; font-weight: 700; color: #94a3b8;">FILTER TANGGAL</label>
+                <input type="date" name="tanggal" th:value="${param.tanggal}"
+                       style="padding: 10px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; font-family: inherit;">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Tampilkan Data</button>
+
+            <button type="button" class="btn btn-reset" onclick="window.location.href='/rekap'">
+                Bersihkan Filter
+            </button>
+        </form>
+    </div>
+
+    <div class="table-card">
+        <table>
+            <thead>
+            <tr>
+                <th>Karyawan</th>
+                <th>Tanggal</th>
+                <th>Jam (Masuk - Pulang)</th>
+                <th>Durasi</th>
+                <th>Status</th>
+                <th>Keterangan</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${listAbsen}">
+                <td>
+                    <div style="font-weight: 700;" th:text="${a.karyawan != null ? a.karyawan.nama : 'N/A'}"></div>
+                    <div style="font-size: 11px; color: #94a3b8;" th:text="${a.karyawan != null ? a.karyawan.jabatan : '-'}"></div>
+                </td>
+                <td th:text="${a.waktuMasuk != null ? #temporals.format(a.waktuMasuk, 'dd MMM yyyy') : '-'}"></td>
+                <td>
+                    <span th:text="${a.waktuMasuk != null ? #temporals.format(a.waktuMasuk, 'HH:mm') : '--:--'}"></span> -
+                    <span th:text="${a.waktuKeluar != null ? #temporals.format(a.waktuKeluar, 'HH:mm') : '--:--'}"></span>
+                </td>
+                <td th:text="${a.durasiKerja ?: '-'}"></td>
+                <td>
+                    <span th:if="${a.status == 'HADIR'}" class="badge bg-hadir">HADIR</span>
+                    <span th:if="${a.status == 'IZIN'}" class="badge bg-izin">IZIN</span>
+                    <span th:if="${a.status == 'SAKIT'}" class="badge bg-sakit">SAKIT</span>
+                </td>
+                <td style="font-size: 13px; color: #64748b;" th:text="${a.alasan ?: a.catatan ?: '-'}"></td>
+            </tr>
+            <tr th:if="${listAbsen.empty}">
+                <td colspan="6" style="text-align: center; padding: 50px; color: #94a3b8;">
+                    <div style="font-size: 30px; margin-bottom: 10px;">📂</div>
+                    Tidak ada data absensi ditemukan.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 25px; text-align: center; font-size: 12px; color: #cbd5e1;">
+        AttendancePro System &copy; 2026
+    </div>
+</div>
+
+</body>
+</html>

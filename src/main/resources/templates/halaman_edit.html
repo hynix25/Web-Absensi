@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Karyawan</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 350px; }
+        h2 { margin-top: 0; text-align: center; color: #333; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn-save { background: #28a745; color: white; border: none; width: 100%; padding: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-back { display: block; text-align: center; margin-top: 15px; color: #666; text-decoration: none; font-size: 13px; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h2>Edit Data</h2>
+    <form th:action="@{/update-karyawan}" th:object="${karyawan}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label>Nama:</label>
+        <input type="text" th:field="*{nama}" required>
+
+        <label>Jabatan:</label>
+        <input type="text" th:field="*{jabatan}" required>
+
+        <button type="submit" class="btn-save">Update Data</button>
+        <a href="/karyawan" class="btn-back">Kembali</a>
+    </form>
+</div>
+</body>
+</html>
